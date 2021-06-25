@@ -22,14 +22,15 @@ def main():
     ball_size = 10
     ball_x = WIDTH / 2
     ball_y = HEIGHT / 2
-    ball_vel = 0.2
+    ball_speed_x = 7
+    ball_speed_y = 7
 
     # Bar Requirements
-    bar_x = 10
-    bar_y = 0
-    bar_vel = 1
     bar_width = 10
     bar_height = 120
+    bar_x = 10
+    bar_y = (HEIGHT / 2) - (bar_height / 2)
+    bar_speed = 7
 
     player_score = 0
     ai_score = 0
@@ -37,8 +38,8 @@ def main():
     FPS = 60
 
     ball = Ball(ball_x, ball_y, ORANGE, ball_size)
-    ai_bar = Bar(bar_x, (HEIGHT / 2) - (bar_height / 2), WHITE, bar_width, bar_height)
-    player_bar = Bar(WIDTH - bar_width - bar_x, (HEIGHT / 2) - (bar_height / 2), WHITE, bar_width, bar_height)
+    ai_bar = Bar(bar_x, bar_y, WHITE, bar_width, bar_height)
+    player_bar = Bar(WIDTH - bar_width - bar_x, bar_y, WHITE, bar_width, bar_height)
 
     def redraw_window():
         # BACKGROUND
@@ -64,27 +65,39 @@ def main():
         WINDOW.blit(player_score_label, (WIDTH / 2 - player_score_label.get_width() + 50, 10))
         WINDOW.blit(ai_score_label, (WIDTH / 2 - 50, 10))
 
-        pygame.display.flip()
         pygame.display.update()
 
     while True:
+        clock.tick(FPS)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
+        # PLAYER MOVIMENT
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] and player_bar.y > 0 + 10:
-            player_bar.y -= bar_vel
+            player_bar.y -= bar_speed
         if keys[pygame.K_DOWN] and player_bar.y < HEIGHT - bar_height - 10:
-            player_bar.y += bar_vel
+            player_bar.y += bar_speed
 
-        # ball.x -= ball_vel
-        # ball.y -= ball_vel
+        # AI MOVIMENT VALIDATION
+        if ai_bar.y <= 10:
+            ai_bar.y = 10
+        if ai_bar.y + bar_height >= HEIGHT - 10:
+            ai_bar.y = HEIGHT - bar_height - 10
+
+        # BALL MOVIMENT
+        ball.x += ball_speed_x
+        ball.y += ball_speed_y
+
+        if ball.x - ball_size <= 0 or ball.x >= WIDTH - ball_size:
+            ball_speed_x *= -1
+        if ball.y - ball_size <= 0 or ball.y >= HEIGHT - ball_size:
+            ball_speed_y *= -1
 
         redraw_window()
-
-    clock.tick(FPS)
 
 if __name__ == "__main__":
     main()
