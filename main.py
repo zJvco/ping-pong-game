@@ -19,7 +19,7 @@ def main():
     clock = pygame.time.Clock()
 
     # Ball Requirements
-    ball_size = 10
+    ball_size = 20
     ball_x = WIDTH / 2
     ball_y = HEIGHT / 2
     ball_speed_x = 7
@@ -30,7 +30,7 @@ def main():
     bar_height = 120
     bar_x = 10
     bar_y = (HEIGHT / 2) - (bar_height / 2)
-    bar_speed = 7
+    bar_speed = 5
 
     player_score = 0
     ai_score = 0
@@ -49,13 +49,16 @@ def main():
         pygame.draw.rect(WINDOW, WHITE, ((WIDTH - 5) / 2, 0, 5, HEIGHT))
 
         # BALL
+        ball.ball_cfg()
         ball.draw(WINDOW)
 
         # AI
+        ai_bar.bar_cfg()
         ai_bar.draw(WINDOW)
         ai_bar.y = ball.y - bar_height / 2
 
         # PLAYER
+        player_bar.bar_cfg()
         player_bar.draw(WINDOW)
 
         # DRAW TEXT
@@ -92,10 +95,16 @@ def main():
         ball.x += ball_speed_x
         ball.y += ball_speed_y
 
-        if ball.x - ball_size <= 0 or ball.x >= WIDTH - ball_size:
+        if ball.x <= 0 or ball.x >= WIDTH - ball_size:
             ball_speed_x *= -1
-        if ball.y - ball_size <= 0 or ball.y >= HEIGHT - ball_size:
+        if ball.y <= 0 or ball.y >= HEIGHT - ball_size:
             ball_speed_y *= -1
+
+        # COLLISION WITH BAR
+        if ball.x <= bar_width + ball_size / 2 and ball.y >= ai_bar.y and ball.y <= ai_bar.y + bar_height:
+            ball_speed_x *= -1
+        if ball.x >= WIDTH - ball_size - bar_width - bar_x and ball.y >= player_bar.y and ball.y <= player_bar.y + bar_height:
+            ball_speed_x *= -1
 
         redraw_window()
 

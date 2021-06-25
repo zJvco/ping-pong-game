@@ -7,6 +7,10 @@ class Bar:
         self.color = color
         self.width = width
         self.height = height
+        self.bar = None
+
+    def bar_cfg(self):
+        self.bar = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def draw(self, window):
-        pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(window, self.color, self.bar)
