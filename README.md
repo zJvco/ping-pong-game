@@ -1,0 +1,1 @@
+Jogo no estilo Ping Pong 2D, existem 2 jogadores, o player e a AI.
