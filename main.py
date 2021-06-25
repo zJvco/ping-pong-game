@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, time
 from ball import Ball
 from bar import Bar
 
@@ -30,16 +30,17 @@ def main():
     bar_height = 120
     bar_x = 10
     bar_y = (HEIGHT / 2) - (bar_height / 2)
-    bar_speed = 5
+    bar_speed = 7
 
     player_score = 0
     ai_score = 0
     font = pygame.font.SysFont("comicsans", 50)
     FPS = 60
 
-    ball = Ball(ball_x, ball_y, ORANGE, ball_size)
-    ai_bar = Bar(bar_x, bar_y, WHITE, bar_width, bar_height)
-    player_bar = Bar(WIDTH - bar_width - bar_x, bar_y, WHITE, bar_width, bar_height)
+    # INSTANCE
+    ball = Ball(ball_x, ball_y, ORANGE, ball_size, ball_speed_x, ball_speed_y)
+    ai_bar = Bar(bar_x, bar_y, WHITE, bar_width, bar_height, bar_speed)
+    player_bar = Bar(WIDTH - bar_width - bar_x, bar_y, WHITE, bar_width, bar_height, bar_speed)
 
     def redraw_window():
         # BACKGROUND
@@ -50,15 +51,17 @@ def main():
 
         # BALL
         ball.ball_cfg()
+        ball.ball_animation(WIDTH, HEIGHT, ai_bar.y, player_bar.y, bar_width, bar_height, bar_x)
         ball.draw(WINDOW)
 
         # AI
         ai_bar.bar_cfg()
+        ai_bar.ai_animation(HEIGHT, ball.y)
         ai_bar.draw(WINDOW)
-        ai_bar.y = ball.y - bar_height / 2
 
         # PLAYER
         player_bar.bar_cfg()
+        player_bar.player_animation(HEIGHT)
         player_bar.draw(WINDOW)
 
         # DRAW TEXT
@@ -68,6 +71,7 @@ def main():
         WINDOW.blit(player_score_label, (WIDTH / 2 - player_score_label.get_width() + 50, 10))
         WINDOW.blit(ai_score_label, (WIDTH / 2 - 50, 10))
 
+        # UPDATE WINDOW
         pygame.display.update()
 
     while True:
@@ -78,33 +82,12 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-        # PLAYER MOVIMENT
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP] and player_bar.y > 0 + 10:
-            player_bar.y -= bar_speed
-        if keys[pygame.K_DOWN] and player_bar.y < HEIGHT - bar_height - 10:
-            player_bar.y += bar_speed
-
-        # AI MOVIMENT VALIDATION
-        if ai_bar.y <= 10:
-            ai_bar.y = 10
-        if ai_bar.y + bar_height >= HEIGHT - 10:
-            ai_bar.y = HEIGHT - bar_height - 10
-
-        # BALL MOVIMENT
-        ball.x += ball_speed_x
-        ball.y += ball_speed_y
-
-        if ball.x <= 0 or ball.x >= WIDTH - ball_size:
-            ball_speed_x *= -1
-        if ball.y <= 0 or ball.y >= HEIGHT - ball_size:
-            ball_speed_y *= -1
-
-        # COLLISION WITH BAR
-        if ball.x <= bar_width + ball_size / 2 and ball.y >= ai_bar.y and ball.y <= ai_bar.y + bar_height:
-            ball_speed_x *= -1
-        if ball.x >= WIDTH - ball_size - bar_width - bar_x and ball.y >= player_bar.y and ball.y <= player_bar.y + bar_height:
-            ball_speed_x *= -1
+        if ball.x <= 0:
+            player_score+=1
+            ball.x, ball.y = ball_x, ball_y
+        if ball.x >= WIDTH - ball_size:
+            ai_score+=1
+            ball.x, ball.y = ball_x, ball_y
 
         redraw_window()
 
