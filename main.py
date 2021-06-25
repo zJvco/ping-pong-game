@@ -2,6 +2,8 @@ import pygame, sys
 from ball import Ball
 from bar import Bar
 
+pygame.font.init()
+
 # COLOR
 WHITE = (255, 255, 255)
 ORANGE = (235, 152, 78)
@@ -20,7 +22,7 @@ def main():
     ball_size = 10
     ball_x = WIDTH / 2
     ball_y = HEIGHT / 2
-    ball_vel = 1
+    ball_vel = 0.2
 
     # Bar Requirements
     bar_x = 10
@@ -29,6 +31,9 @@ def main():
     bar_width = 10
     bar_height = 120
 
+    player_score = 0
+    ai_score = 0
+    font = pygame.font.SysFont("comicsans", 50)
     FPS = 60
 
     ball = Ball(ball_x, ball_y, ORANGE, ball_size)
@@ -52,6 +57,13 @@ def main():
         # PLAYER
         player_bar.draw(WINDOW)
 
+        # DRAW TEXT
+        player_score_label = font.render(f"{player_score}", 1, WHITE)
+        ai_score_label = font.render(f"{ai_score}", 1, WHITE)
+
+        WINDOW.blit(player_score_label, (WIDTH / 2 - player_score_label.get_width() + 50, 10))
+        WINDOW.blit(ai_score_label, (WIDTH / 2 - 50, 10))
+
         pygame.display.flip()
         pygame.display.update()
 
@@ -67,8 +79,8 @@ def main():
         if keys[pygame.K_DOWN] and player_bar.y < HEIGHT - bar_height - 10:
             player_bar.y += bar_vel
 
-        ball.x -= ball_vel
-        ball.y -= ball_vel
+        # ball.x -= ball_vel
+        # ball.y -= ball_vel
 
         redraw_window()
 
