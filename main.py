@@ -1,8 +1,11 @@
-import pygame, sys, time
+import pygame
+import sys
+import os
+from pygame import mixer
 from ball import Ball
 from bar import Bar
 
-pygame.font.init()
+pygame.init()
 
 # COLOR
 WHITE = (255, 255, 255)
@@ -37,8 +40,20 @@ def main():
     font = pygame.font.SysFont("comicsans", 50)
     FPS = 60
 
+    # BACKGROUND MUSIC
+    mixer.music.load(os.path.join("assets", "happynes.wav"))
+    mixer.music.play(-1)
+    mixer.music.set_volume(0.1)
+
+    # BALL SOUND
+    ball_sound = mixer.Sound(os.path.join("assets", "sound_bouncing.wav"))
+
+    # POINT MATCH
+    point_match_sound = mixer.Sound(os.path.join("assets", "sound_correct.wav"))
+    point_match_sound.set_volume(0.1)
+
     # INSTANCE
-    ball = Ball(ball_x, ball_y, ORANGE, ball_size, ball_speed_x, ball_speed_y)
+    ball = Ball(ball_x, ball_y, ORANGE, ball_size, ball_speed_x, ball_speed_y, ball_sound)
     ai_bar = Bar(bar_x, bar_y, WHITE, bar_width, bar_height, bar_speed)
     player_bar = Bar(WIDTH - bar_width - bar_x, bar_y, WHITE, bar_width, bar_height, bar_speed)
 
@@ -73,23 +88,25 @@ def main():
 
         # UPDATE WINDOW
         pygame.display.update()
-
-    while True:
         clock.tick(FPS)
 
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
         if ball.x <= 0:
-            player_score+=1
+            point_match_sound.play()
+            player_score += 1
             ball.x, ball.y = ball_x, ball_y
         if ball.x >= WIDTH - ball_size:
-            ai_score+=1
+            point_match_sound.play()
+            ai_score += 1
             ball.x, ball.y = ball_x, ball_y
 
         redraw_window()
+
 
 if __name__ == "__main__":
     main()
