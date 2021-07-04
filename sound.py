@@ -7,11 +7,12 @@ class Sound:
         self.ball_sound = mixer.Sound(os.path.join("assets", "sound_bouncing.wav"))
         self.point_match_sound = mixer.Sound(os.path.join("assets", "sound_correct.wav"))
 
-    def volume_control(self):
-        self.point_match_sound.set_volume(0.1)
-        mixer.music.set_volume(0.1)
+    def volume_control(self, value):
+        self.point_match_sound.set_volume(value)
+        self.ball_sound.set_volume(value)
+        mixer.music.set_volume(value)
 
-    def player_background_music(self):
+    def play_background_music(self):
         mixer.music.play(-1)
 
     def stop_background_music(self):
