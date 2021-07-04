@@ -1,112 +1,78 @@
 import pygame
 import sys
-import os
-from pygame import mixer
 from ball import Ball
 from bar import Bar
+from sound import Sound
 
-pygame.init()
-
-# COLOR
+# COLORS
 WHITE = (255, 255, 255)
 ORANGE = (235, 152, 78)
 DARK_BLUE = (44, 62, 80)
 
-# DISPLAY
-WIDTH, HEIGHT = 1000, 600
-WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
-BACKGROUND_COLOR = pygame.color.Color(DARK_BLUE)
-pygame.display.set_caption("Ping Pong")
+class Main:
+    def __init__(self):
+        pygame.init()
+        pygame.display.set_caption("Ping Pong")
 
-def main():
-    clock = pygame.time.Clock()
+        self.WIDTH = 1000
+        self.HEIGHT = 600
+        self.WINDOW = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        self.player_score = 0
+        self.ai_score = 0
+        self.font = pygame.font.SysFont("comicsans", 50)
+        self.FPS = 60
+        self.BACKGROUND_COLOR = pygame.color.Color(DARK_BLUE)
+        self.clock = pygame.time.Clock()
 
-    # Ball Requirements
-    ball_size = 20
-    ball_x = WIDTH / 2
-    ball_y = HEIGHT / 2
-    ball_speed_x = 7
-    ball_speed_y = 7
+    def draw(self):
+        player_score_label = self.font.render(f"{self.player_score}", 1, WHITE)
+        ai_score_label = self.font.render(f"{self.ai_score}", 1, WHITE)
 
-    # Bar Requirements
-    bar_width = 10
-    bar_height = 120
-    bar_x = 10
-    bar_y = (HEIGHT / 2) - (bar_height / 2)
-    bar_speed = 7
+        self.WINDOW.blit(player_score_label, (self.WIDTH / 2 - player_score_label.get_width() + 50, 10))
+        self.WINDOW.blit(ai_score_label, (self.WIDTH / 2 - 50, 10))
 
-    player_score = 0
-    ai_score = 0
-    font = pygame.font.SysFont("comicsans", 50)
-    FPS = 60
+    def main_loop(self):
+        sound = Sound()
+        ball = Ball(self.WIDTH, self.HEIGHT, ORANGE)
+        ai_bar = Bar(10, (self.HEIGHT / 2) - (120 / 2), WHITE)
+        player_bar = Bar(self.WIDTH - 20, (self.HEIGHT / 2) - (120 / 2), WHITE)
 
-    # BACKGROUND MUSIC
-    mixer.music.load(os.path.join("assets", "happynes.wav"))
-    mixer.music.play(-1)
-    mixer.music.set_volume(0.1)
+        sound.player_background_music()
+        sound.volume_control()
 
-    # BALL SOUND
-    ball_sound = mixer.Sound(os.path.join("assets", "sound_bouncing.wav"))
+        while True:
+            self.WINDOW.fill(self.BACKGROUND_COLOR)
+            pygame.draw.rect(self.WINDOW, WHITE, ((self.WIDTH - 5) / 2, 0, 5, self.HEIGHT))
 
-    # POINT MATCH
-    point_match_sound = mixer.Sound(os.path.join("assets", "sound_correct.wav"))
-    point_match_sound.set_volume(0.1)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
-    # INSTANCE
-    ball = Ball(ball_x, ball_y, ORANGE, ball_size, ball_speed_x, ball_speed_y, ball_sound)
-    ai_bar = Bar(bar_x, bar_y, WHITE, bar_width, bar_height, bar_speed)
-    player_bar = Bar(WIDTH - bar_width - bar_x, bar_y, WHITE, bar_width, bar_height, bar_speed)
+            if ball.x <= 0:
+                sound.play_point_match_sound()
+                self.player_score += 1
+                ball.x, ball.y = self.WIDTH / 2, self.HEIGHT / 2
+            if ball.x >= self.WIDTH - ball.size:
+                sound.play_point_match_sound()
+                self.ai_score += 1
+                ball.x, ball.y = self.WIDTH / 2, self.HEIGHT / 2
 
-    def redraw_window():
-        # BACKGROUND
-        WINDOW.fill(BACKGROUND_COLOR)
+            player_bar.bar_cfg()
+            player_bar.player_animation(self.HEIGHT)
+            player_bar.draw(self.WINDOW)
 
-        # MIDDLE LINE
-        pygame.draw.rect(WINDOW, WHITE, ((WIDTH - 5) / 2, 0, 5, HEIGHT))
+            ai_bar.bar_cfg()
+            ai_bar.ai_animation(self.HEIGHT, ball.y)
+            ai_bar.draw(self.WINDOW)
 
-        # BALL
-        ball.ball_cfg()
-        ball.ball_animation(WIDTH, HEIGHT, ai_bar.y, player_bar.y, bar_width, bar_height, bar_x)
-        ball.draw(WINDOW)
+            ball.ball_cfg()
+            ball.detect_collision(player_bar.get_bar_cfg(), ai_bar.get_bar_cfg(), sound)
+            ball.ball_animation(self.WIDTH, self.HEIGHT, sound)
+            ball.draw(self.WINDOW)
 
-        # AI
-        ai_bar.bar_cfg()
-        ai_bar.ai_animation(HEIGHT, ball.y)
-        ai_bar.draw(WINDOW)
-
-        # PLAYER
-        player_bar.bar_cfg()
-        player_bar.player_animation(HEIGHT)
-        player_bar.draw(WINDOW)
-
-        # DRAW TEXT
-        player_score_label = font.render(f"{player_score}", 1, WHITE)
-        ai_score_label = font.render(f"{ai_score}", 1, WHITE)
-
-        WINDOW.blit(player_score_label, (WIDTH / 2 - player_score_label.get_width() + 50, 10))
-        WINDOW.blit(ai_score_label, (WIDTH / 2 - 50, 10))
-
-        # UPDATE WINDOW
-        pygame.display.update()
-        clock.tick(FPS)
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        if ball.x <= 0:
-            point_match_sound.play()
-            player_score += 1
-            ball.x, ball.y = ball_x, ball_y
-        if ball.x >= WIDTH - ball_size:
-            point_match_sound.play()
-            ai_score += 1
-            ball.x, ball.y = ball_x, ball_y
-
-        redraw_window()
-
+            pygame.display.update()
+            self.clock.tick(self.FPS)
 
 if __name__ == "__main__":
-    main()
+    Main().main_loop()

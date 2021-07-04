@@ -1,17 +1,20 @@
 import pygame
 
 class Bar:
-    def __init__(self, x, y, color, width, height, bar_speed):
+    def __init__(self, x, y, color):
+        self.width = 10
+        self.height = 120
         self.x = x
         self.y = y
         self.color = color
-        self.width = width
-        self.height = height
-        self.bar_speed = bar_speed
+        self.bar_speed = 7
         self.bar = None
 
     def bar_cfg(self):
         self.bar = pygame.Rect(self.x, self.y, self.width, self.height)
+
+    def get_bar_cfg(self):
+        return self.bar
 
     def player_animation(self, window_height):
         keys = pygame.key.get_pressed()
